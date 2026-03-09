@@ -68,7 +68,7 @@ class CalculadoraOvos {
     adicionarEventos() {
         // Toggle de modo
         this.modoBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.alternarModo(e.target.dataset.mode));
+            btn.addEventListener('click', (e) => this.alternarModo(e.currentTarget.dataset.mode));
         });
         
         // Botão calcular
@@ -106,6 +106,8 @@ class CalculadoraOvos {
     }
 
     alternarModo(novoModo) {
+        if (!novoModo) return;
+
         this.modo = novoModo;
         
         // Atualizar botões
@@ -351,15 +353,6 @@ class CalculadoraOvos {
             currency: 'BRL'
         }).format(valor);
     }
-}
-
-// ============================================
-// INICIALIZAR QUANDO DOM ESTIVER PRONTO
-// ============================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    new CalculadoraOvos();
-});
 
     gerarPDF() {
         // Obter dados do formulário
@@ -461,3 +454,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Gerar PDF
         html2pdf().set(opt).from(element).save();
     }
+}
+
+
+// ============================================
+// INICIALIZAR QUANDO DOM ESTIVER PRONTO
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    new CalculadoraOvos();
+});
+
