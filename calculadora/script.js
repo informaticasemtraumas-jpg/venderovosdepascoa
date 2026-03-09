@@ -11,7 +11,6 @@ class CalculadoraOvos {
     inicializar() {
         this.selecionarElementos();
         this.adicionarEventos();
-        this.carregarValoresExemplo();
     }
 
     selecionarElementos() {
@@ -22,6 +21,7 @@ class CalculadoraOvos {
         this.form = document.getElementById('calculadoraForm');
         this.btnCalcular = document.getElementById('btnCalcular');
         this.btnSimularOutro = document.getElementById('btnSimularOutro');
+        this.btnBaixarPDF = document.getElementById('btnBaixarPDF');
         
         // Campos simples
         this.nomeProduto = document.getElementById('nomeProduto');
@@ -68,26 +68,36 @@ class CalculadoraOvos {
     adicionarEventos() {
         // Toggle de modo
         this.modoBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.alternarModo(e.target.dataset.mode));
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.alternarModo(e.target.dataset.mode);
+            });
         });
         
         // Botão calcular
-        this.btnCalcular.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.calcular();
-        });
+        if (this.btnCalcular) {
+            this.btnCalcular.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.calcular();
+            });
+        }
         
         // Botão baixar PDF
-        const btnBaixarPDF = document.getElementById('btnBaixarPDF');
-        if (btnBaixarPDF) {
-            btnBaixarPDF.addEventListener('click', () => this.gerarPDF());
+        if (this.btnBaixarPDF) {
+            this.btnBaixarPDF.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.gerarPDF();
+            });
         }
         
         // Botão simular outro
-        this.btnSimularOutro.addEventListener('click', () => {
-            this.blocoResultado.style.display = 'none';
-            this.form.scrollIntoView({ behavior: 'smooth' });
-        });
+        if (this.btnSimularOutro) {
+            this.btnSimularOutro.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.blocoResultado.style.display = 'none';
+                this.form.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
         
         // Enter no formulário
         this.form.addEventListener('keypress', (e) => {
@@ -96,13 +106,13 @@ class CalculadoraOvos {
                 this.calcular();
             }
         });
-        
-        // Atualização automática (opcional - comentado por padrão)
-        // this.form.addEventListener('input', () => this.calcular());
-    }
 
-    carregarValoresExemplo() {
-        // Valores já estão no HTML
+        // Evento de reset do formulário
+        this.form.addEventListener('reset', () => {
+            this.blocoResultado.style.display = 'none';
+            this.avisos.innerHTML = '';
+            this.avisos.classList.remove('ativo');
+        });
     }
 
     alternarModo(novoModo) {
@@ -120,16 +130,8 @@ class CalculadoraOvos {
         const camposAvancados = document.querySelectorAll('.avancado-only');
         camposAvancados.forEach(campo => {
             if (novoModo === 'avancado') {
-                campo.classList.add('visible');
-                if (campo.classList.contains('form-row')) {
-                    campo.style.display = 'grid';
-                } else if (campo.classList.contains('form-group')) {
-                    campo.style.display = 'block';
-                } else if (campo.classList.contains('resultado-item')) {
-                    campo.style.display = 'block';
-                }
+                campo.style.display = ''; // Restaura o display original (grid ou block conforme CSS)
             } else {
-                campo.classList.remove('visible');
                 campo.style.display = 'none';
             }
         });
@@ -178,36 +180,32 @@ class CalculadoraOvos {
         }
         
         // Obter valores
-        const pesoCasca = parseFloat(this.pesoCasca.value);
-        const pesoRecheio = parseFloat(this.pesoRecheio.value);
-        const pesoDecoracao = parseFloat(this.pesoDecoracao.value) || 0;
+        const pesoCasca = parseFloat(this.pesoCasca.value) || 0;
+        const pesoRecheio = parseFloat(this.pesoRecheio.value) || 0;
+        const pesoDecoracao = parseFloat(this.pesoDecoracao?.value) || 0;
         
-        const custoCasca = parseFloat(this.custoCasca.value);
-        const custoRecheio = parseFloat(this.custoRecheio.value);
-        const custoDecoracao = parseFloat(this.custoDecoracao.value) || 0;
+        const custoCasca = parseFloat(this.custoCasca.value) || 0;
+        const custoRecheio = parseFloat(this.custoRecheio.value) || 0;
+        const custoDecoracao = parseFloat(this.custoDecoracao?.value) || 0;
         
-        const custoEmbalagem = parseFloat(this.custoEmbalagem.value);
-        const custoColher = parseFloat(this.custoColher.value) || 0;
-        const custoFitaTag = parseFloat(this.custoFitaTag.value) || 0;
-        const outrosCustos = parseFloat(this.outrosCustos.value) || 0;
+        const custoEmbalagem = parseFloat(this.custoEmbalagem.value) || 0;
+        const custoColher = parseFloat(this.custoColher?.value) || 0;
+        const custoFitaTag = parseFloat(this.custoFitaTag?.value) || 0;
+        const outrosCustos = parseFloat(this.outrosCustos?.value) || 0;
         
-        const tempoProducao = parseFloat(this.tempoProducao.value);
-        const valorHora = parseFloat(this.valorHora.value);
+        const tempoProducao = parseFloat(this.tempoProducao.value) || 0;
+        const valorHora = parseFloat(this.valorHora.value) || 0;
         
-        const custoGasEnergia = parseFloat(this.custoGasEnergia.value) || 0;
-        const custoAguaLimpeza = parseFloat(this.custoAguaLimpeza.value) || 0;
-        const custoFixoMensal = parseFloat(this.custoFixoMensal.value) || 0;
-        const quantidadeMedia = parseFloat(this.quantidadeMedia.value) || 1;
+        const custoGasEnergia = parseFloat(this.custoGasEnergia?.value) || 0;
+        const custoAguaLimpeza = parseFloat(this.custoAguaLimpeza?.value) || 0;
+        const custoFixoMensal = parseFloat(this.custoFixoMensal?.value) || 0;
+        const quantidadeMedia = parseFloat(this.quantidadeMedia?.value) || 1;
         
-        const margemLucro = parseFloat(this.margemLucro.value);
-        const taxaMaquininha = parseFloat(this.taxaMaquininha.value) || 0;
-        const percentualPerdas = parseFloat(this.percentualPerdas.value) || 0;
-        const taxaEntrega = parseFloat(this.taxaEntrega.value) || 0;
-        const descontoPromocional = parseFloat(this.descontoPromocional.value) || 0;
-        
-        // ============================================
-        // FÓRMULAS DE CÁLCULO
-        // ============================================
+        const margemLucro = parseFloat(this.margemLucro.value) || 0;
+        const taxaMaquininha = parseFloat(this.taxaMaquininha?.value) || 0;
+        const percentualPerdas = parseFloat(this.percentualPerdas?.value) || 0;
+        const taxaEntrega = parseFloat(this.taxaEntrega?.value) || 0;
+        const descontoPromocional = parseFloat(this.descontoPromocional?.value) || 0;
         
         // 1. Custo da casca
         const custoCascaTotal = (pesoCasca / 1000) * custoCasca;
@@ -221,16 +219,16 @@ class CalculadoraOvos {
         // Custo total de ingredientes
         const custoIngredientesTotal = custoCascaTotal + custoRecheioTotal + custoDecoracao_Total;
         
-        // 4. Custo de embalagem (soma de todos os itens)
+        // 4. Custo de embalagem
         const custoEmbalagemTotal_Calc = custoEmbalagem + custoColher + custoFitaTag + outrosCustos;
         
         // 5. Mão de obra por unidade
         const custoMaoObraTotal = (tempoProducao / 60) * valorHora;
         
         // 6. Custos fixos rateados
-        const custoFixoRateado_Calc = custoFixoMensal / quantidadeMedia;
+        const custoFixoRateado_Calc = custoFixoMensal / (quantidadeMedia || 1);
         
-        // 7. Subtotal (ingredientes + embalagem + variáveis + mão de obra + custos fixos)
+        // 7. Subtotal
         const subtotal = custoIngredientesTotal + custoEmbalagemTotal_Calc + custoGasEnergia + custoAguaLimpeza + custoMaoObraTotal + custoFixoRateado_Calc;
         
         // 8. Perdas/imprevistos
@@ -240,28 +238,24 @@ class CalculadoraOvos {
         const custoRealFinal = subtotal + custoPerdasImprevistos;
         
         // 10. Preço mínimo (custo real + taxa de maquininha)
-        const precoMinimoCalc = custoRealFinal / (1 - (taxaMaquininha / 100));
+        const precoMinimoCalc = custoRealFinal / (1 - (taxaMaquininha / 100) || 1);
         
         // 11. Preço sugerido com margem de lucro
-        // Fórmula: Preço = (Custo Real + Taxa) / (1 - Margem% - Taxa%)
-        const precoSugeridoCalc = (custoRealFinal + taxaEntrega) / (1 - ((margemLucro + taxaMaquininha) / 100));
+        const precoSugeridoCalc = (custoRealFinal + taxaEntrega) / (1 - ((margemLucro + taxaMaquininha) / 100) || 1);
         
-        // Aplicar desconto promocional se houver
+        // Aplicar desconto
         const precoComDesconto = precoSugeridoCalc * (1 - (descontoPromocional / 100));
         
         // Arredondar para valor comercial
         const precoFinal = this.arredondarComercial(precoComDesconto);
         
-        // 12. Lucro por unidade (considerando taxa)
+        // 12. Lucro por unidade
         const lucroUnidadeCalc = precoFinal - (precoFinal * (taxaMaquininha / 100)) - custoRealFinal;
         
         // 13. Margem percentual
         const margemPercentual = (lucroUnidadeCalc / precoFinal) * 100;
         
-        // ============================================
         // ATUALIZAR INTERFACE
-        // ============================================
-        
         this.custoIngredientes.textContent = this.formatarMoeda(custoIngredientesTotal);
         this.custoEmbalagemTotal.textContent = this.formatarMoeda(custoEmbalagemTotal_Calc);
         this.custoMaoObra.textContent = this.formatarMoeda(custoMaoObraTotal);
@@ -282,31 +276,15 @@ class CalculadoraOvos {
 
     verificarAvisos(custoReal, preco, margemReal, margemDesejada) {
         const avisos = [];
-        
-        // Aviso 1: Preço abaixo do custo
         if (preco < custoReal) {
-            avisos.push({
-                tipo: 'erro',
-                mensagem: '⚠️ ATENÇÃO: O preço sugerido está abaixo do custo real! Revise seus valores.'
-            });
+            avisos.push({ tipo: 'erro', mensagem: '⚠️ ATENÇÃO: O preço sugerido está abaixo do custo real! Revise seus valores.' });
         }
-        
-        // Aviso 2: Margem inviável
         if (margemReal < (margemDesejada * 0.5)) {
-            avisos.push({
-                tipo: 'aviso',
-                mensagem: `⚠️ A margem real (${margemReal.toFixed(2)}%) é menor que a desejada (${margemDesejada.toFixed(2)}%). Considere aumentar o preço.`
-            });
+            avisos.push({ tipo: 'aviso', mensagem: `⚠️ A margem real (${margemReal.toFixed(2)}%) é menor que a desejada (${margemDesejada.toFixed(2)}%). Considere aumentar o preço.` });
         }
-        
-        // Aviso 3: Margem muito baixa
         if (margemReal < 10) {
-            avisos.push({
-                tipo: 'aviso',
-                mensagem: '⚠️ Margem de lucro muito baixa. Considere aumentar o preço para maior sustentabilidade.'
-            });
+            avisos.push({ tipo: 'aviso', mensagem: '⚠️ Margem de lucro muito baixa. Considere aumentar o preço para maior sustentabilidade.' });
         }
-        
         this.mostrarAvisos(avisos);
     }
 
@@ -316,105 +294,72 @@ class CalculadoraOvos {
             this.avisos.innerHTML = '';
             return;
         }
-        
         let html = '';
         avisos.forEach(aviso => {
             html += `<div class="aviso ${aviso.tipo}">${aviso.mensagem}</div>`;
         });
-        
         this.avisos.innerHTML = html;
         this.avisos.classList.add('ativo');
     }
 
     mostrarErro(erros) {
-        const mensagem = erros.join('\n');
-        alert('Erro na validação:\n\n' + mensagem);
+        alert('Erro na validação:\n\n' + erros.join('\n'));
     }
 
     arredondarComercial(valor) {
-        // Arredondar para valores comerciais: 9.90, 14.90, 19.90, 24.90, 29.90, 34.90, 39.90, 44.90, 49.90, etc
         const inteiro = Math.floor(valor);
         const decimal = valor - inteiro;
-        
-        // Se o decimal é menor que 0.90, arredondar para .90 do mesmo inteiro
-        // Se o decimal é >= 0.90, arredondar para .90 do próximo inteiro
-        if (decimal < 0.90) {
-            return inteiro + 0.90;
-        } else {
-            return (inteiro + 1) + 0.90;
-        }
+        return (decimal < 0.90) ? inteiro + 0.90 : (inteiro + 1) + 0.90;
     }
 
     formatarMoeda(valor) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(valor);
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     }
-}
-
-// ============================================
-// INICIALIZAR QUANDO DOM ESTIVER PRONTO
-// ============================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    new CalculadoraOvos();
-});
 
     gerarPDF() {
-        // Obter dados do formulário
         const nomeProduto = this.nomeProduto.value || 'Ovo de Páscoa';
-        const pesoCasca = this.pesoCasca.value;
-        const pesoRecheio = this.pesoRecheio.value;
-        const custoCasca = this.custoCasca.value;
-        const custoRecheio = this.custoRecheio.value;
-        const custoEmbalagem = this.custoEmbalagem.value;
-        const tempoProducao = this.tempoProducao.value;
-        const valorHora = this.valorHora.value;
-        const margemLucro = this.margemLucro.value;
         
-        // Criar conteúdo do PDF
         const pdfContent = `
-            <div style="background: white; padding: 30px; font-family: 'Inter', sans-serif;">
+            <div style="background: white; padding: 30px; font-family: Arial, sans-serif; color: #333;">
                 <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #E8B4B8;">
-                    <h1 style="color: #6B3E26; font-size: 1.8rem; margin: 0 0 10px 0; font-family: 'Poppins', sans-serif;">🍫 Relatório de Preço - Ovo de Páscoa</h1>
+                    <h1 style="color: #6B3E26; font-size: 1.8rem; margin: 0 0 10px 0;">🍫 Relatório de Preço - Ovo de Páscoa</h1>
                     <p style="color: #666; font-size: 0.95rem; margin: 5px 0;">Calculadora de Preços para Confeiteiras</p>
                 </div>
                 
                 <div style="background: #F4E6D9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin: 8px 0;"><strong style="color: #6B3E26;">Produto:</strong> ${nomeProduto}</p>
-                    <p style="margin: 8px 0;"><strong style="color: #6B3E26;">Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+                    <p style="margin: 8px 0;"><strong>Produto:</strong> ${nomeProduto}</p>
+                    <p style="margin: 8px 0;"><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
                 </div>
                 
-                <h3 style="color: #6B3E26; margin-top: 20px; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">📊 Dados do Cálculo</h3>
+                <h3 style="color: #6B3E26; margin-top: 20px; margin-bottom: 10px;">📊 Dados do Cálculo</h3>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem;">
                     <tr style="background: #F4E6D9;">
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Peso da Casca</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${pesoCasca}g</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.pesoCasca.value}g</td>
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Custo/kg</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(custoCasca).toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.custoCasca.value || 0).toFixed(2)}</td>
                     </tr>
                     <tr>
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Peso do Recheio</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${pesoRecheio}g</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.pesoRecheio.value}g</td>
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Custo/kg</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(custoRecheio).toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.custoRecheio.value || 0).toFixed(2)}</td>
                     </tr>
                     <tr style="background: #F4E6D9;">
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Tempo de Produção</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${tempoProducao} min</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.tempoProducao.value} min</td>
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Valor/hora</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(valorHora).toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.valorHora.value || 0).toFixed(2)}</td>
                     </tr>
                     <tr>
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Custo Embalagem</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(custoEmbalagem).toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.custoEmbalagem.value || 0).toFixed(2)}</td>
                         <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Margem Desejada</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${margemLucro}%</td>
+                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.margemLucro.value}%</td>
                     </tr>
                 </table>
                 
-                <h3 style="color: #6B3E26; margin-top: 20px; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">✨ Resultados Finais</h3>
+                <h3 style="color: #6B3E26; margin-top: 20px; margin-bottom: 10px;">✨ Resultados Finais</h3>
                 <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
                     <tr style="background: #FFF8F2; border-bottom: 2px solid #E8B4B8;">
                         <td style="padding: 12px; border: 1px solid #E5D5C8;"><strong>Custo Real Total</strong></td>
@@ -440,24 +385,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #E5D5C8; text-align: center; font-size: 0.85rem; color: #666;">
                     <p style="margin: 5px 0;">Relatório gerado pela Calculadora de Preços de Ovos de Páscoa</p>
-                    <p style="margin: 5px 0;">Ferramenta desenvolvida para confeiteiras e pequenos empreendedores</p>
                 </div>
             </div>
         `;
         
-        // Criar elemento temporário
         const element = document.createElement('div');
         element.innerHTML = pdfContent;
         
-        // Configurações do PDF
         const opt = {
             margin: 10,
-            filename: `Relatorio-${nomeProduto.replace(/\s+/g, '-')}-${new Date().getTime()}.pdf`,
+            filename: `Relatorio-${nomeProduto.replace(/\s+/g, '-')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: false },
+            html2canvas: { scale: 2 },
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
         
-        // Gerar PDF
-        html2pdf().set(opt).from(element).save();
+        if (typeof html2pdf !== 'undefined') {
+            html2pdf().set(opt).from(element).save();
+        } else {
+            alert('Erro: Biblioteca de PDF não carregada.');
+        }
     }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new CalculadoraOvos();
+});
