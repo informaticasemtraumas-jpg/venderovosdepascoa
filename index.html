@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Preços - Ovos de Páscoa</title>
+    <title>Calculadora de Preços - Ovos de Páscoa Profissional</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@
             box-shadow: 0 4px 15px rgba(107, 62, 38, 0.08);
             border: 1px solid var(--borda);
         }
-        .card h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--fundo-suave); padding-bottom: 8px; }
+        .card h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--fundo-suave); padding-bottom: 8px; display: flex; align-items: center; gap: 10px; }
 
         /* FORMULÁRIO */
         .form-group { margin-bottom: 15px; }
@@ -74,7 +74,9 @@
         .btn-main {
             flex: 2; background: var(--btn-main); color: white; border: none; padding: 15px;
             border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            transition: background 0.3s;
         }
+        .btn-main:hover { background: var(--btn-hover); }
         .btn-secondary {
             flex: 1; background: white; color: var(--texto-suave); border: 1px solid var(--borda);
             padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer;
@@ -98,7 +100,7 @@
         }
 
         /* RODAPÉ */
-        .footer { text-align: center; margin-top: 30px; color: var(--texto-suave); font-size: 0.8rem; }
+        .footer { text-align: center; margin-top: 30px; color: var(--texto-suave); font-size: 0.8rem; padding-bottom: 20px; }
 
         /* RESPONSIVIDADE */
         @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
@@ -107,9 +109,10 @@
         @media print {
             body { background: white; padding: 0; }
             .container { max-width: 100%; }
-            .header, form, .btn-pdf, .footer { display: none !important; }
-            .result-card { display: block !important; border: none; box-shadow: none; }
+            .header, form, .btn-pdf, .footer, .actions { display: none !important; }
+            .result-card { display: block !important; border: none; box-shadow: none; margin-top: 0; }
             .result-item { border: 1px solid #ccc; }
+            .card { border: none; box-shadow: none; }
         }
     </style>
 </head>
@@ -117,10 +120,11 @@
     <div class="container">
         <header class="header">
             <h1>🍫 Calculadora de Preços - Ovos de Páscoa</h1>
-            <p>Simples, rápida e precisa para o seu negócio</p>
+            <p>Precificação Profissional para Confeiteiras</p>
         </header>
 
         <form id="calcForm">
+            <!-- DADOS DO PRODUTO -->
             <section class="card">
                 <h2>📦 Dados do Produto</h2>
                 <div class="form-group">
@@ -137,34 +141,50 @@
                         <input type="number" id="pRecheio" value="150">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="pDecoracao">Peso Decoração (g)</label>
+                    <input type="number" id="pDecoracao" value="20">
+                    <small>Confeitos, granulados, etc.</small>
+                </div>
             </section>
 
+            <!-- INGREDIENTES -->
             <section class="card">
-                <h2>🥣 Ingredientes e Custos</h2>
+                <h2>🥣 Ingredientes (Custo por kg)</h2>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="cCasca">Custo Chocolate (kg)</label>
+                        <label for="cCasca">Chocolate (kg)</label>
                         <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cCasca" value="35.00" step="0.01"></div>
                     </div>
                     <div class="form-group">
-                        <label for="cRecheio">Custo Recheio (kg)</label>
+                        <label for="cRecheio">Recheio (kg)</label>
                         <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cRecheio" value="25.00" step="0.01"></div>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="cDecoracao">Decoração (kg)</label>
+                    <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cDecoracao" value="15.00" step="0.01"></div>
+                </div>
+            </section>
+
+            <!-- EMBALAGEM E EXTRAS -->
+            <section class="card">
+                <h2>🎀 Embalagem e Extras</h2>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="cEmbalagem">Custo Embalagem</label>
+                        <label for="cEmbalagem">Embalagem (Caixa/Papel)</label>
                         <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cEmbalagem" value="3.50" step="0.01"></div>
                     </div>
                     <div class="form-group">
-                        <label for="margem">Margem Lucro (%)</label>
-                        <div class="input-wrapper has-suffix"><input type="number" id="margem" value="40"><span class="suffix">%</span></div>
+                        <label for="cExtras">Extras (Fita/Tag/Colher)</label>
+                        <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cExtras" value="1.50" step="0.01"></div>
                     </div>
                 </div>
             </section>
 
+            <!-- CUSTOS FIXOS E MÃO DE OBRA -->
             <section class="card">
-                <h2>⏱️ Mão de Obra</h2>
+                <h2>⏱️ Custos Fixos e Mão de Obra</h2>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tempo">Tempo Produção (min)</label>
@@ -175,29 +195,59 @@
                         <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="vHora" value="50.00" step="0.01"></div>
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cFixo">Gás/Energia/Água (unid)</label>
+                        <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cFixo" value="1.00" step="0.01"></div>
+                        <small>Custo estimado por ovo</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="perdas">Perdas/Imprevistos (%)</label>
+                        <div class="input-wrapper has-suffix"><input type="number" id="perdas" value="5"><span class="suffix">%</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MARGEM E TAXAS -->
+            <section class="card">
+                <h2>📈 Margem e Taxas</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="margem">Margem Lucro (%)</label>
+                        <div class="input-wrapper has-suffix"><input type="number" id="margem" value="40"><span class="suffix">%</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="taxa">Taxa Maquininha (%)</label>
+                        <div class="input-wrapper has-suffix"><input type="number" id="taxa" value="3.5"><span class="suffix">%</span></div>
+                    </div>
+                </div>
             </section>
 
             <div class="actions">
-                <button type="button" id="btnCalc" class="btn-main">Calcular Preço</button>
+                <button type="button" id="btnCalc" class="btn-main">Calcular Preço Profissional</button>
                 <button type="reset" class="btn-secondary">Limpar</button>
             </div>
         </form>
 
+        <!-- RESULTADO FINAL -->
         <section id="resCard" class="card result-card">
-            <h2 id="resTitulo">✨ Resultado Final</h2>
+            <h2 id="resTitulo">✨ Relatório de Precificação</h2>
             <div class="result-grid">
                 <div class="result-item"><span>Custo Ingredientes</span><strong id="resIng">R$ 0,00</strong></div>
                 <div class="result-item"><span>Custo Mão de Obra</span><strong id="resMao">R$ 0,00</strong></div>
+                <div class="result-item"><span>Custos Fixos/Extras</span><strong id="resFixo">R$ 0,00</strong></div>
+                <div class="result-item"><span>Reserva de Perdas</span><strong id="resPerda">R$ 0,00</strong></div>
                 <div class="result-item highlight"><span>Custo Real Total</span><strong id="resTotal">R$ 0,00</strong></div>
-                <div class="result-item highlight success"><span>Preço Sugerido</span><strong id="resSugerido">R$ 0,00</strong></div>
-                <div class="result-item success"><span>Lucro por Unidade</span><strong id="resLucro">R$ 0,00</strong></div>
-                <div class="result-item success"><span>Margem Final</span><strong id="resMargem">0,00%</strong></div>
+                <div class="result-item"><span>Preço Mínimo (Sem Lucro)</span><strong id="resMinimo">R$ 0,00</strong></div>
+                <div class="result-item highlight success"><span>Preço Sugerido de Venda</span><strong id="resSugerido">R$ 0,00</strong></div>
+                <div class="result-item success"><span>Lucro Líquido Real</span><strong id="resLucro">R$ 0,00</strong></div>
+                <div class="result-item success"><span>Margem Final Real</span><strong id="resMargem">0,00%</strong></div>
             </div>
             <button type="button" id="btnPDF" class="btn-pdf">📥 Baixar Relatório PDF</button>
         </section>
 
         <footer class="footer">
-            <p>Calculadora de Ovos de Páscoa - Organização e Lucro</p>
+            <p>Calculadora de Ovos de Páscoa Profissional - Organização e Lucro</p>
         </footer>
     </div>
 
@@ -207,29 +257,61 @@
 
         document.getElementById('btnCalc').addEventListener('click', () => {
             const nome = document.getElementById('nome').value;
+            
+            // Captura de valores
             const pCasca = getV('pCasca');
             const pRecheio = getV('pRecheio');
+            const pDecor = getV('pDecoracao');
+            
             const cCasca = getV('cCasca');
             const cRecheio = getV('cRecheio');
+            const cDecor = getV('cDecoracao');
+            
             const cEmb = getV('cEmbalagem');
+            const cExtras = getV('cExtras');
+            
             const tempo = getV('tempo');
             const vHora = getV('vHora');
-            const margem = getV('margem');
-
-            const custoIng = ((pCasca / 1000) * cCasca) + ((pRecheio / 1000) * cRecheio);
-            const custoMao = (tempo / 60) * vHora;
-            const custoTotal = custoIng + cEmb + custoMao;
+            const cFixo = getV('cFixo');
+            const perdasPerc = getV('perdas');
             
-            const precoSugerido = custoTotal * (1 + (margem / 100));
-            const lucro = precoSugerido - custoTotal;
-            const margemFinal = (lucro / precoSugerido) * 100;
+            const margemPerc = getV('margem');
+            const taxaPerc = getV('taxa');
 
-            document.getElementById('resTitulo').innerText = "✨ Resultado: " + nome;
+            // Cálculos de Custo
+            const custoIng = ((pCasca / 1000) * cCasca) + ((pRecheio / 1000) * cRecheio) + ((pDecor / 1000) * cDecor);
+            const custoMao = (tempo / 60) * vHora;
+            const custoFixoTotal = cFixo + cEmb + cExtras;
+            
+            // Custo Base antes de perdas e taxas
+            let custoBase = custoIng + custoMao + custoFixoTotal;
+            
+            // Adiciona reserva de perdas
+            const valorPerda = custoBase * (perdasPerc / 100);
+            const custoRealTotal = custoBase + valorPerda;
+            
+            // Cálculo do Preço de Venda (Markup)
+            // Preço = Custo / (1 - Margem - Taxas)
+            const divisor = 1 - (margemPerc / 100) - (taxaPerc / 100);
+            let precoSugerido = custoRealTotal / (divisor > 0 ? divisor : 0.1);
+            
+            // Arredondamento amigável (ex: 39.90)
+            precoSugerido = Math.ceil(precoSugerido) - 0.10;
+            if (precoSugerido < custoRealTotal) precoSugerido += 1.00;
+
+            const lucroReal = precoSugerido - custoRealTotal - (precoSugerido * (taxaPerc / 100));
+            const margemFinal = (lucroReal / precoSugerido) * 100;
+
+            // Atualização da Interface
+            document.getElementById('resTitulo').innerText = "✨ Relatório: " + nome;
             document.getElementById('resIng').innerText = format(custoIng);
             document.getElementById('resMao').innerText = format(custoMao);
-            document.getElementById('resTotal').innerText = format(custoTotal);
+            document.getElementById('resFixo').innerText = format(custoFixoTotal);
+            document.getElementById('resPerda').innerText = format(valorPerda);
+            document.getElementById('resTotal').innerText = format(custoRealTotal);
+            document.getElementById('resMinimo').innerText = format(custoRealTotal);
             document.getElementById('resSugerido').innerText = format(precoSugerido);
-            document.getElementById('resLucro').innerText = format(lucro);
+            document.getElementById('resLucro').innerText = format(lucroReal);
             document.getElementById('resMargem').innerText = margemFinal.toFixed(2) + "%";
 
             document.getElementById('resCard').style.display = 'block';
