@@ -1,0 +1,187 @@
+/**
+ * CALCULADORA DE PREÇOS - OVOS DE PÁSCOA
+ * Versão 4.0 - Reconstruída com Foco em PDF e Design
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Calculadora de Páscoa: Pronta!");
+
+    // --- SELEÇÃO DE ELEMENTOS ---
+    const form = document.getElementById('calculadoraForm');
+    const btnCalcular = document.getElementById('btnCalcular');
+    const btnBaixarPDF = document.getElementById('btnBaixarPDF');
+    const btnSimularOutro = document.getElementById('btnSimularOutro');
+    const blocoResultado = document.getElementById('bloco-resultado');
+    const modoBtns = document.querySelectorAll('.mode-btn');
+    const avisosDiv = document.getElementById('avisos');
+
+    let modoAtual = 'simples';
+
+    // --- FUNÇÕES DE UTILIDADE ---
+    const formatarMoeda = (valor) => {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    };
+
+    const getV = (id) => {
+        const el = document.getElementById(id);
+        return el ? (parseFloat(el.value) || 0) : 0;
+    };
+
+    const setT = (id, valor, isMoeda = true) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = isMoeda ? formatarMoeda(valor) : valor;
+        }
+    };
+
+    // Arredondamento comercial (ex: 39.90, 44.90)
+    const arredondarComercial = (valor) => {
+        const inteiro = Math.floor(valor);
+        const decimal = valor - inteiro;
+        if (decimal < 0.90) return inteiro + 0.90;
+        return (inteiro + 1) + 0.90;
+    };
+
+    // --- LÓGICA DE INTERFACE ---
+    modoBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            modoAtual = this.getAttribute('data-mode');
+            
+            modoBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const camposAvancados = document.querySelectorAll('.avancado-only');
+            camposAvancados.forEach(campo => {
+                if (modoAtual === 'avancado') {
+                    campo.style.display = campo.classList.contains('form-row') ? 'grid' : 'block';
+                } else {
+                    campo.style.display = 'none';
+                }
+            });
+
+            if (blocoResultado.style.display !== 'none') calcular();
+        });
+    });
+
+    // --- LÓGICA DE CÁLCULO ---
+    function calcular() {
+        // 1. Coleta de Dados
+        const d = {
+            pesoCasca: getV('pesoCasca'),
+            pesoRecheio: getV('pesoRecheio'),
+            pesoDecoracao: getV('pesoDecoracao'),
+            custoCasca: getV('custoCasca'),
+            custoRecheio: getV('custoRecheio'),
+            custoDecoracao: getV('custoDecoracao'),
+            custoEmbalagem: getV('custoEmbalagem'),
+            custoColher: getV('custoColher'),
+            custoFitaTag: getV('custoFitaTag'),
+            outrosCustos: getV('outrosCustos'),
+            tempoProducao: getV('tempoProducao'),
+            valorHora: getV('valorHora'),
+            custoGasEnergia: getV('custoGasEnergia'),
+            custoAguaLimpeza: getV('custoAguaLimpeza'),
+            custoFixoMensal: getV('custoFixoMensal'),
+            quantidadeMedia: getV('quantidadeMedia') || 1,
+            margemLucro: getV('margemLucro'),
+            taxaMaquininha: getV('taxaMaquininha'),
+            percentualPerdas: getV('percentualPerdas'),
+            taxaEntrega: getV('taxaEntrega'),
+            descontoPromocional: getV('descontoPromocional')
+        };
+
+        // 2. Fórmulas Obrigatórias
+        const custoCasca = (d.pesoCasca / 1000) * d.custoCasca;
+        const custoRecheio = (d.pesoRecheio / 1000) * d.custoRecheio;
+        const custoDecoracao = (d.pesoDecoracao / 1000) * d.custoDecoracao;
+        const custoIngredientes = custoCasca + custoRecheio + custoDecoracao;
+        
+        const custoEmbalagemTotal = d.custoEmbalagem + d.custoColher + d.custoFitaTag + d.outrosCustos;
+        const custoMaoObra = (d.tempoProducao / 60) * d.valorHora;
+        const custoFixoRateado = d.custoFixoMensal / d.quantidadeMedia;
+        
+        const subtotal = custoIngredientes + custoEmbalagemTotal + custoMaoObra + custoFixoRateado + d.custoGasEnergia + d.custoAguaLimpeza;
+        const perdas = subtotal * (d.percentualPerdas / 100);
+        const custoRealTotal = subtotal + perdas;
+
+        // Preço Sugerido (Markup considerando margem e taxas)
+        const divisor = 1 - (d.margemLucro / 100) - (d.taxaMaquininha / 100);
+        let precoSugerido = (custoRealTotal + d.taxaEntrega) / (divisor > 0 ? divisor : 1);
+        
+        // Aplicar desconto e arredondar
+        precoSugerido = precoSugerido * (1 - (d.descontoPromocional / 100));
+        const precoFinal = arredondarComercial(precoSugerido);
+        
+        const precoMinimo = custoRealTotal / (1 - (d.taxaMaquininha / 100) || 1);
+        const lucroUnidade = precoFinal - (precoFinal * (d.taxaMaquininha / 100)) - custoRealTotal;
+        const margemFinal = (lucroUnidade / precoFinal) * 100;
+
+        // 3. Exibição
+        setT('resIngredientes', custoIngredientes);
+        setT('resEmbalagem', custoEmbalagemTotal);
+        setT('resMaoObra', custoMaoObra);
+        setT('resFixo', custoFixoRateado);
+        setT('resCustoTotal', custoRealTotal);
+        setT('resPrecoMinimo', precoMinimo);
+        setT('resPrecoSugerido', precoFinal);
+        setT('resLucro', lucroUnidade);
+        setT('resMargem', (isNaN(margemFinal) ? "0,00" : margemFinal.toFixed(2)) + "%", false);
+
+        // 4. Avisos
+        avisosDiv.innerHTML = '';
+        if (precoFinal < custoRealTotal) {
+            avisosDiv.innerHTML += '<div class="aviso erro">⚠️ Atenção: O preço sugerido está abaixo do custo real!</div>';
+        }
+        if (margemFinal < 10) {
+            avisosDiv.innerHTML += '<div class="aviso">💡 Dica: Sua margem de lucro está muito baixa. Considere aumentar o preço.</div>';
+        }
+
+        blocoResultado.style.display = 'block';
+        blocoResultado.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- EVENTOS ---
+    if (btnCalcular) btnCalcular.addEventListener('click', (e) => { e.preventDefault(); calcular(); });
+    
+    if (btnSimularOutro) {
+        btnSimularOutro.addEventListener('click', () => {
+            blocoResultado.style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    if (form) {
+        form.addEventListener('reset', () => {
+            setTimeout(() => {
+                blocoResultado.style.display = 'none';
+                modoBtns[0].click();
+            }, 10);
+        });
+    }
+
+    // --- GERAÇÃO DE PDF ---
+    if (btnBaixarPDF) {
+        btnBaixarPDF.addEventListener('click', function(e) {
+            e.preventDefault();
+            const nomeProd = document.getElementById('nomeProduto').value || 'Ovo_de_Pascoa';
+            
+            // Criamos um clone do resultado para o PDF ficar bonito
+            const element = blocoResultado.cloneNode(true);
+            element.style.display = 'block';
+            element.querySelector('.result-actions').remove(); // Remove botões do PDF
+            element.style.padding = '20px';
+            element.style.background = '#FFF8F2';
+
+            const opt = {
+                margin: 10,
+                filename: `Orcamento_${nomeProd.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        });
+    }
+});
