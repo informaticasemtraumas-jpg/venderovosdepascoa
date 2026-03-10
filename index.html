@@ -1,147 +1,244 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Páscoa Lucrativa — O Guia Prático de Ovos de Páscoa para Iniciantes</title>
-  <meta name="description" content="Aprenda a produzir ovos de Páscoa profissionais de forma simples e transforme chocolate em renda extra com um passo a passo completo para iniciantes." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Preços - Ovos de Páscoa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* PALETA DE CORES PÁSCOA */
+        :root {
+            --chocolate: #6B3E26;
+            --secundaria: #8B5A3C;
+            --fundo-suave: #F4E6D9;
+            --card-bg: #FFF8F2;
+            --destaque: #E8B4B8;
+            --btn-main: #C97B63;
+            --btn-hover: #B56A54;
+            --sucesso: #6AA84F;
+            --texto: #4A3022;
+            --texto-suave: #7D6355;
+            --borda: #E2D1C3;
+        }
+
+        /* RESET E BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--fundo-suave);
+            color: var(--texto);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        h1, h2 { font-family: 'Poppins', sans-serif; color: var(--chocolate); }
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /* CABEÇALHO */
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 1.8rem; margin-bottom: 10px; }
+        .header p { color: var(--texto-suave); font-size: 1rem; }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(107, 62, 38, 0.08);
+            border: 1px solid var(--borda);
+        }
+        .card h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--fundo-suave); padding-bottom: 8px; }
+
+        /* FORMULÁRIO */
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        input {
+            width: 100%; padding: 10px; border: 1px solid var(--borda); border-radius: 8px;
+            font-size: 1rem; color: var(--texto); background: white;
+        }
+        input:focus { outline: none; border-color: var(--btn-main); }
+        small { display: block; color: var(--texto-suave); font-size: 0.75rem; margin-top: 3px; }
+        
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .prefix { position: absolute; left: 10px; color: var(--texto-suave); font-weight: 600; }
+        .suffix { position: absolute; right: 10px; color: var(--texto-suave); font-weight: 600; }
+        .input-wrapper input { padding-left: 35px; }
+        .input-wrapper.has-suffix input { padding-right: 35px; }
+
+        /* BOTÕES */
+        .actions { display: flex; gap: 10px; margin-bottom: 30px; }
+        .btn-main {
+            flex: 2; background: var(--btn-main); color: white; border: none; padding: 15px;
+            border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+        }
+        .btn-secondary {
+            flex: 1; background: white; color: var(--texto-suave); border: 1px solid var(--borda);
+            padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer;
+        }
+
+        /* RESULTADOS */
+        .result-card { border: 2px solid var(--destaque); display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .result-item { background: white; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--borda); }
+        .result-item span { display: block; font-size: 0.75rem; color: var(--texto-suave); margin-bottom: 3px; }
+        .result-item strong { font-size: 1rem; color: var(--chocolate); }
+        .result-item.highlight { background: var(--fundo-suave); border-color: var(--chocolate); grid-column: span 2; }
+        .result-item.success { background: #E8F5E9; border-color: var(--sucesso); }
+        .result-item.success strong { color: var(--sucesso); }
+        .result-item.highlight strong { font-size: 1.4rem; }
+
+        .btn-pdf {
+            width: 100%; background: var(--chocolate); color: white; border: none; padding: 12px;
+            border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 15px;
+        }
+
+        /* RODAPÉ */
+        .footer { text-align: center; margin-top: 30px; color: var(--texto-suave); font-size: 0.8rem; }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+        /* ESTILO PARA IMPRESSÃO (PDF) */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { max-width: 100%; }
+            .header, form, .btn-pdf, .footer { display: none !important; }
+            .result-card { display: block !important; border: none; box-shadow: none; }
+            .result-item { border: 1px solid #ccc; }
+        }
+    </style>
 </head>
 <body>
-  <header class="hero" id="topo">
-    <div class="container hero-content">
-      <p class="badge">🔥 Guia Prático para Iniciantes — Edição 2026</p>
-      <h1>Transforme chocolate em <span>Renda Extra</span> nesta Páscoa mesmo começando do zero</h1>
-      <p class="subtitle">O método definitivo para produzir ovos profissionais usando cobertura fracionada, sem a complicação da temperagem, e faturar alto com receitas testadas.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="https://go.hotmart.com/G104804623M?dp=1">Quero meu Guia por R$ 19,90</a>
-        <p class="secure">✅ Acesso imediato • Garantia de 7 dias</p>
-      </div>
-      <div class="hero-metrics">
-        <article><strong>4.9/5</strong><span>Avaliação média</span></article>
-        <article><strong>+R$ 2.000</strong><span>Potencial de lucro por ciclo</span></article>
-        <article><strong>10 Receitas</strong><span>As mais pedidas e lucrativas</span></article>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <section class="problem section">
-      <div class="container two-col">
-        <div>
-          <h2>Você quer fazer Ovos de Páscoa, mas tem medo de errar?</h2>
-          <p>Muitas pessoas desistem de empreender na Páscoa porque acham que precisam de uma cozinha profissional ou técnicas complexas de temperagem de chocolate. O <strong>Guia Páscoa Lucrativa</strong> foi criado justamente para quebrar essas barreiras.</p>
-          <ul class="check-list">
-            <li>Aprenda a usar cobertura fracionada (derrete fácil, sem temperagem!).</li>
-            <li>Descubra os materiais básicos para começar sem gastar muito.</li>
-            <li>Entenda a "Regra de Ouro" dos recheios para nunca mais perder uma casca.</li>
-            <li>Siga um passo a passo visual e direto ao ponto.</li>
-          </ul>
-        </div>
-        <div class="card-highlight">
-          <h3>O que você vai dominar:</h3>
-          <ul>
-            <li>✅ Técnica de casca perfeita com formas de 3 partes.</li>
-            <li>✅ 10 Receitas completas (Brigadeiro, Ninho com Nutella, Oreo e mais).</li>
-            <li>✅ Como organizar sua produção em casa.</li>
-            <li>✅ Dicas de ouro para um acabamento profissional.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="content section" id="conteudo">
-      <div class="container">
-        <h2>O que você encontra no Guia Prático</h2>
-        <div class="grid cards">
-          <article class="card">
-            <h3>Materiais e Preparo</h3>
-            <p>Tudo sobre formas de acetato, balança, espátulas e o segredo da cobertura fracionada para iniciantes.</p>
-          </article>
-          <article class="card">
-            <h3>As 10 Melhores Receitas</h3>
-            <p>Ovos de colher de Brigadeiro, Maracujá, Prestígio, Paçoca, Brownie e o clássico Ovo Trufado Fechado.</p>
-          </article>
-          <article class="card">
-            <h3>Técnicas de Montagem</h3>
-            <p>Como rechear corretamente, selar as cascas e garantir que o seu produto chegue perfeito ao cliente.</p>
-          </article>
-          <article class="card">
-            <h3>Dicas de Especialista</h3>
-            <p>Orientações sobre validade, brilho, embalagens e como evitar marcas de dedos no chocolate.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="bonus section">
-      <div class="container">
-        <h2>Bônus exclusivos para você começar hoje</h2>
-        <div class="grid bonus-grid">
-          <article><h3>Bônus 1</h3><p>Guia de fotos com celular para valorizar seus produtos.</p></article>
-          <article><h3>Bônus 2</h3><p>Checklist de produção para organizar sua cozinha.</p></article>
-          <article><h3>Bônus 3</h3><p>Roteiro de divulgação para WhatsApp e Instagram.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="testimonials section" id="depoimentos">
-      <div class="container">
-        <h2>Quem já começou a lucrar</h2>
-        <div class="grid testimonial-grid">
-          <blockquote>
-            “O guia é muito prático! Usei a dica da cobertura fracionada e fiz meus primeiros ovos sem erro nenhum.”
-            <cite>— Juliana M., São Paulo</cite>
-          </blockquote>
-          <blockquote>
-            “As receitas de Ninho com Nutella e Oreo são um sucesso absoluto. Já recuperei o valor do guia no primeiro dia.”
-            <cite>— Carla R., Curitiba</cite>
-          </blockquote>
-          <blockquote>
-            “Finalmente entendi como precificar e vender. O material é direto ao ponto, sem enrolação.”
-            <cite>— Aline T., Recife</cite>
-          </blockquote>
-        </div>
-      </div>
-    </section>
-
-    <section class="offer section" id="oferta">
-      <div class="container offer-box">
-        <h2>Oferta Especial de Lançamento</h2>
-        <p class="old-price">De <s>R$ 47,00</s> por apenas</p>
-        <p class="price">R$ 19,90 <span>Pagamento Único</span></p>
-        <a class="btn btn-primary btn-lg" href="https://go.hotmart.com/G104804623M?dp=1" target="_blank" aria-label="Comprar guia agora">Quero o Guia Prático Agora</a>
-        <p class="secure">🔒 Pagamento 100% seguro • PIX, cartão e boleto</p>
-      </div>
-    </section>
-
-    <section class="faq section" id="faq">
-      <div class="container">
-        <h2>Perguntas frequentes</h2>
-        <details>
-          <summary>Como recebo o Guia?</summary>
-          <p>O acesso é liberado imediatamente após a confirmação do pagamento no seu e-mail cadastrado.</p>
-        </details>
-        <details>
-          <summary>Preciso de equipamentos caros?</summary>
-          <p>Não! O guia ensina como começar com utensílios básicos que você provavelmente já tem na sua cozinha.</p>
-        </details>
-        <details>
-          <summary>O conteúdo serve para quem nunca fez chocolate?</summary>
-          <p>Sim! Ele foi escrito especificamente para iniciantes, com linguagem simples e muitas fotos explicativas.</p>
-        </details>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
     <div class="container">
-      <p>© 2026 Páscoa Lucrativa — Por Marcelo Paes. Todos os direitos reservados.</p>
-      <a href="#topo">Voltar ao topo ↑</a>
+        <header class="header">
+            <h1>🍫 Calculadora de Preços - Ovos de Páscoa</h1>
+            <p>Simples, rápida e precisa para o seu negócio</p>
+        </header>
+
+        <form id="calcForm">
+            <section class="card">
+                <h2>📦 Dados do Produto</h2>
+                <div class="form-group">
+                    <label for="nome">Nome do Produto</label>
+                    <input type="text" id="nome" value="Ovo de Páscoa Recheado">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pCasca">Peso Casca (g)</label>
+                        <input type="number" id="pCasca" value="200">
+                    </div>
+                    <div class="form-group">
+                        <label for="pRecheio">Peso Recheio (g)</label>
+                        <input type="number" id="pRecheio" value="150">
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>🥣 Ingredientes e Custos</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cCasca">Custo Chocolate (kg)</label>
+                        <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cCasca" value="35.00" step="0.01"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cRecheio">Custo Recheio (kg)</label>
+                        <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cRecheio" value="25.00" step="0.01"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cEmbalagem">Custo Embalagem</label>
+                        <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="cEmbalagem" value="3.50" step="0.01"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="margem">Margem Lucro (%)</label>
+                        <div class="input-wrapper has-suffix"><input type="number" id="margem" value="40"><span class="suffix">%</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>⏱️ Mão de Obra</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tempo">Tempo Produção (min)</label>
+                        <input type="number" id="tempo" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="vHora">Valor da sua Hora</label>
+                        <div class="input-wrapper"><span class="prefix">R$</span><input type="number" id="vHora" value="50.00" step="0.01"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="actions">
+                <button type="button" id="btnCalc" class="btn-main">Calcular Preço</button>
+                <button type="reset" class="btn-secondary">Limpar</button>
+            </div>
+        </form>
+
+        <section id="resCard" class="card result-card">
+            <h2 id="resTitulo">✨ Resultado Final</h2>
+            <div class="result-grid">
+                <div class="result-item"><span>Custo Ingredientes</span><strong id="resIng">R$ 0,00</strong></div>
+                <div class="result-item"><span>Custo Mão de Obra</span><strong id="resMao">R$ 0,00</strong></div>
+                <div class="result-item highlight"><span>Custo Real Total</span><strong id="resTotal">R$ 0,00</strong></div>
+                <div class="result-item highlight success"><span>Preço Sugerido</span><strong id="resSugerido">R$ 0,00</strong></div>
+                <div class="result-item success"><span>Lucro por Unidade</span><strong id="resLucro">R$ 0,00</strong></div>
+                <div class="result-item success"><span>Margem Final</span><strong id="resMargem">0,00%</strong></div>
+            </div>
+            <button type="button" id="btnPDF" class="btn-pdf">📥 Baixar Relatório PDF</button>
+        </section>
+
+        <footer class="footer">
+            <p>Calculadora de Ovos de Páscoa - Organização e Lucro</p>
+        </footer>
     </div>
-  </footer>
+
+    <script>
+        const format = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+        document.getElementById('btnCalc').addEventListener('click', () => {
+            const nome = document.getElementById('nome').value;
+            const pCasca = getV('pCasca');
+            const pRecheio = getV('pRecheio');
+            const cCasca = getV('cCasca');
+            const cRecheio = getV('cRecheio');
+            const cEmb = getV('cEmbalagem');
+            const tempo = getV('tempo');
+            const vHora = getV('vHora');
+            const margem = getV('margem');
+
+            const custoIng = ((pCasca / 1000) * cCasca) + ((pRecheio / 1000) * cRecheio);
+            const custoMao = (tempo / 60) * vHora;
+            const custoTotal = custoIng + cEmb + custoMao;
+            
+            const precoSugerido = custoTotal * (1 + (margem / 100));
+            const lucro = precoSugerido - custoTotal;
+            const margemFinal = (lucro / precoSugerido) * 100;
+
+            document.getElementById('resTitulo').innerText = "✨ Resultado: " + nome;
+            document.getElementById('resIng').innerText = format(custoIng);
+            document.getElementById('resMao').innerText = format(custoMao);
+            document.getElementById('resTotal').innerText = format(custoTotal);
+            document.getElementById('resSugerido').innerText = format(precoSugerido);
+            document.getElementById('resLucro').innerText = format(lucro);
+            document.getElementById('resMargem').innerText = margemFinal.toFixed(2) + "%";
+
+            document.getElementById('resCard').style.display = 'block';
+            document.getElementById('resCard').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('btnPDF').addEventListener('click', () => {
+            window.print();
+        });
+    </script>
 </body>
 </html>
