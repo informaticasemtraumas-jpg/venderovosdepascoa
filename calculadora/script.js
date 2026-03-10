@@ -108,17 +108,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (btnBaixarPDF) {
-        btnBaixarPDF.addEventListener('click', function() {
+        btnBaixarPDF.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Seleciona o bloco de resultado
             const element = document.getElementById('bloco-resultado');
             const nomeProd = document.getElementById('nomeProduto').value || 'Ovo_de_Pascoa';
+            
+            if (!element || element.style.display === 'none') {
+                alert('Por favor, realize o cálculo antes de gerar o PDF.');
+                return;
+            }
+
+            // Configurações otimizadas para evitar páginas em branco
             const opt = {
-                margin: 10,
-                filename: `Orcamento_${nomeProd}.pdf`,
+                margin: [10, 10, 10, 10],
+                filename: `Orcamento_${nomeProd.replace(/\s+/g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    scrollY: 0
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().set(opt).from(element).save();
+            
+            // Executa a geração com um pequeno delay para garantir a renderização
+            console.log("Gerando PDF...");
+            html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+                console.log("PDF gerado com sucesso!");
+            }).save();
         });
     }
-});
