@@ -11,6 +11,8 @@ class CalculadoraOvos {
     inicializar() {
         this.selecionarElementos();
         this.adicionarEventos();
+        // Forçar modo inicial
+        this.alternarModo('simples');
     }
 
     selecionarElementos() {
@@ -109,9 +111,19 @@ class CalculadoraOvos {
 
         // Evento de reset do formulário
         this.form.addEventListener('reset', () => {
-            this.blocoResultado.style.display = 'none';
-            this.avisos.innerHTML = '';
-            this.avisos.classList.remove('ativo');
+            setTimeout(() => {
+                this.blocoResultado.style.display = 'none';
+                this.avisos.innerHTML = '';
+                this.avisos.classList.remove('ativo');
+                this.alternarModo('simples');
+            }, 10);
+        });
+
+        // Atualização automática ao digitar
+        this.form.addEventListener('input', () => {
+            if (this.blocoResultado.style.display === 'block') {
+                this.calcular();
+            }
         });
     }
 
@@ -130,132 +142,93 @@ class CalculadoraOvos {
         const camposAvancados = document.querySelectorAll('.avancado-only');
         camposAvancados.forEach(campo => {
             if (novoModo === 'avancado') {
-                campo.style.display = ''; // Restaura o display original (grid ou block conforme CSS)
+                // Se for uma row do formulário, usa grid, senão block
+                if (campo.classList.contains('form-row')) {
+                    campo.style.display = 'grid';
+                } else {
+                    campo.style.display = 'block';
+                }
             } else {
                 campo.style.display = 'none';
             }
         });
+
+        // Se já houver resultado, recalcula para o novo modo
+        if (this.blocoResultado.style.display === 'block') {
+            this.calcular();
+        }
     }
 
     validar() {
         const erros = [];
-        
-        // Validações obrigatórias
-        if (!this.pesoCasca.value || parseFloat(this.pesoCasca.value) <= 0) {
-            erros.push('Peso da casca é obrigatório e deve ser maior que 0');
-        }
-        if (!this.pesoRecheio.value || parseFloat(this.pesoRecheio.value) <= 0) {
-            erros.push('Peso do recheio é obrigatório e deve ser maior que 0');
-        }
-        if (!this.custoCasca.value || parseFloat(this.custoCasca.value) < 0) {
-            erros.push('Custo do chocolate é obrigatório e não pode ser negativo');
-        }
-        if (!this.custoRecheio.value || parseFloat(this.custoRecheio.value) < 0) {
-            erros.push('Custo do recheio é obrigatório e não pode ser negativo');
-        }
-        if (!this.custoEmbalagem.value || parseFloat(this.custoEmbalagem.value) < 0) {
-            erros.push('Custo da embalagem é obrigatório e não pode ser negativo');
-        }
-        if (!this.tempoProducao.value || parseFloat(this.tempoProducao.value) <= 0) {
-            erros.push('Tempo de produção é obrigatório e deve ser maior que 0');
-        }
-        if (!this.valorHora.value || parseFloat(this.valorHora.value) <= 0) {
-            erros.push('Valor da hora é obrigatório e deve ser maior que 0');
-        }
-        if (!this.margemLucro.value || parseFloat(this.margemLucro.value) < 0) {
-            erros.push('Margem de lucro é obrigatória e não pode ser negativa');
-        }
+        if (!this.pesoCasca.value || parseFloat(this.pesoCasca.value) <= 0) erros.push('Peso da casca é obrigatório');
+        if (!this.pesoRecheio.value || parseFloat(this.pesoRecheio.value) <= 0) erros.push('Peso do recheio é obrigatório');
+        if (!this.custoCasca.value || parseFloat(this.custoCasca.value) < 0) erros.push('Custo do chocolate é obrigatório');
+        if (!this.custoRecheio.value || parseFloat(this.custoRecheio.value) < 0) erros.push('Custo do recheio é obrigatório');
+        if (!this.tempoProducao.value || parseFloat(this.tempoProducao.value) <= 0) erros.push('Tempo de produção é obrigatório');
+        if (!this.valorHora.value || parseFloat(this.valorHora.value) <= 0) erros.push('Valor da hora é obrigatório');
         
         if (erros.length > 0) {
             this.mostrarErro(erros);
             return false;
         }
-        
         return true;
     }
 
     calcular() {
-        if (!this.validar()) {
-            return;
-        }
+        if (!this.validar()) return;
         
-        // Obter valores
+        // Obter valores (garantindo 0 se vazio ou oculto)
         const pesoCasca = parseFloat(this.pesoCasca.value) || 0;
         const pesoRecheio = parseFloat(this.pesoRecheio.value) || 0;
-        const pesoDecoracao = parseFloat(this.pesoDecoracao?.value) || 0;
+        const pesoDecoracao = (this.modo === 'avancado') ? (parseFloat(this.pesoDecoracao.value) || 0) : 0;
         
         const custoCasca = parseFloat(this.custoCasca.value) || 0;
         const custoRecheio = parseFloat(this.custoRecheio.value) || 0;
-        const custoDecoracao = parseFloat(this.custoDecoracao?.value) || 0;
+        const custoDecoracao = (this.modo === 'avancado') ? (parseFloat(this.custoDecoracao.value) || 0) : 0;
         
         const custoEmbalagem = parseFloat(this.custoEmbalagem.value) || 0;
-        const custoColher = parseFloat(this.custoColher?.value) || 0;
-        const custoFitaTag = parseFloat(this.custoFitaTag?.value) || 0;
-        const outrosCustos = parseFloat(this.outrosCustos?.value) || 0;
+        const custoColher = (this.modo === 'avancado') ? (parseFloat(this.custoColher.value) || 0) : 0;
+        const custoFitaTag = (this.modo === 'avancado') ? (parseFloat(this.custoFitaTag.value) || 0) : 0;
+        const outrosCustos = (this.modo === 'avancado') ? (parseFloat(this.outrosCustos.value) || 0) : 0;
         
         const tempoProducao = parseFloat(this.tempoProducao.value) || 0;
         const valorHora = parseFloat(this.valorHora.value) || 0;
         
-        const custoGasEnergia = parseFloat(this.custoGasEnergia?.value) || 0;
-        const custoAguaLimpeza = parseFloat(this.custoAguaLimpeza?.value) || 0;
-        const custoFixoMensal = parseFloat(this.custoFixoMensal?.value) || 0;
-        const quantidadeMedia = parseFloat(this.quantidadeMedia?.value) || 1;
+        const custoGasEnergia = (this.modo === 'avancado') ? (parseFloat(this.custoGasEnergia.value) || 0) : 0;
+        const custoAguaLimpeza = (this.modo === 'avancado') ? (parseFloat(this.custoAguaLimpeza.value) || 0) : 0;
+        const custoFixoMensal = (this.modo === 'avancado') ? (parseFloat(this.custoFixoMensal.value) || 0) : 0;
+        const quantidadeMedia = (this.modo === 'avancado') ? (parseFloat(this.quantidadeMedia.value) || 1) : 1;
         
         const margemLucro = parseFloat(this.margemLucro.value) || 0;
-        const taxaMaquininha = parseFloat(this.taxaMaquininha?.value) || 0;
-        const percentualPerdas = parseFloat(this.percentualPerdas?.value) || 0;
-        const taxaEntrega = parseFloat(this.taxaEntrega?.value) || 0;
-        const descontoPromocional = parseFloat(this.descontoPromocional?.value) || 0;
+        const taxaMaquininha = (this.modo === 'avancado') ? (parseFloat(this.taxaMaquininha.value) || 0) : 0;
+        const percentualPerdas = (this.modo === 'avancado') ? (parseFloat(this.percentualPerdas.value) || 0) : 0;
+        const taxaEntrega = (this.modo === 'avancado') ? (parseFloat(this.taxaEntrega.value) || 0) : 0;
+        const descontoPromocional = (this.modo === 'avancado') ? (parseFloat(this.descontoPromocional.value) || 0) : 0;
         
-        // 1. Custo da casca
+        // Fórmulas
         const custoCascaTotal = (pesoCasca / 1000) * custoCasca;
-        
-        // 2. Custo do recheio
         const custoRecheioTotal = (pesoRecheio / 1000) * custoRecheio;
-        
-        // 3. Custo da decoração
         const custoDecoracao_Total = (pesoDecoracao / 1000) * custoDecoracao;
-        
-        // Custo total de ingredientes
         const custoIngredientesTotal = custoCascaTotal + custoRecheioTotal + custoDecoracao_Total;
         
-        // 4. Custo de embalagem
         const custoEmbalagemTotal_Calc = custoEmbalagem + custoColher + custoFitaTag + outrosCustos;
-        
-        // 5. Mão de obra por unidade
         const custoMaoObraTotal = (tempoProducao / 60) * valorHora;
-        
-        // 6. Custos fixos rateados
         const custoFixoRateado_Calc = custoFixoMensal / (quantidadeMedia || 1);
         
-        // 7. Subtotal
         const subtotal = custoIngredientesTotal + custoEmbalagemTotal_Calc + custoGasEnergia + custoAguaLimpeza + custoMaoObraTotal + custoFixoRateado_Calc;
-        
-        // 8. Perdas/imprevistos
         const custoPerdasImprevistos = subtotal * (percentualPerdas / 100);
-        
-        // 9. Custo real final
         const custoRealFinal = subtotal + custoPerdasImprevistos;
         
-        // 10. Preço mínimo (custo real + taxa de maquininha)
         const precoMinimoCalc = custoRealFinal / (1 - (taxaMaquininha / 100) || 1);
-        
-        // 11. Preço sugerido com margem de lucro
         const precoSugeridoCalc = (custoRealFinal + taxaEntrega) / (1 - ((margemLucro + taxaMaquininha) / 100) || 1);
-        
-        // Aplicar desconto
         const precoComDesconto = precoSugeridoCalc * (1 - (descontoPromocional / 100));
-        
-        // Arredondar para valor comercial
         const precoFinal = this.arredondarComercial(precoComDesconto);
         
-        // 12. Lucro por unidade
         const lucroUnidadeCalc = precoFinal - (precoFinal * (taxaMaquininha / 100)) - custoRealFinal;
-        
-        // 13. Margem percentual
         const margemPercentual = (lucroUnidadeCalc / precoFinal) * 100;
         
-        // ATUALIZAR INTERFACE
+        // Atualizar Interface
         this.custoIngredientes.textContent = this.formatarMoeda(custoIngredientesTotal);
         this.custoEmbalagemTotal.textContent = this.formatarMoeda(custoEmbalagemTotal_Calc);
         this.custoMaoObra.textContent = this.formatarMoeda(custoMaoObraTotal);
@@ -266,44 +239,24 @@ class CalculadoraOvos {
         this.lucroUnidade.textContent = this.formatarMoeda(lucroUnidadeCalc);
         this.margemFinal.textContent = margemPercentual.toFixed(2) + '%';
         
-        // Mostrar resultado
         this.blocoResultado.style.display = 'block';
-        this.blocoResultado.scrollIntoView({ behavior: 'smooth' });
-        
-        // Validações e avisos
         this.verificarAvisos(custoRealFinal, precoFinal, margemPercentual, margemLucro);
     }
 
     verificarAvisos(custoReal, preco, margemReal, margemDesejada) {
         const avisos = [];
-        if (preco < custoReal) {
-            avisos.push({ tipo: 'erro', mensagem: '⚠️ ATENÇÃO: O preço sugerido está abaixo do custo real! Revise seus valores.' });
-        }
-        if (margemReal < (margemDesejada * 0.5)) {
-            avisos.push({ tipo: 'aviso', mensagem: `⚠️ A margem real (${margemReal.toFixed(2)}%) é menor que a desejada (${margemDesejada.toFixed(2)}%). Considere aumentar o preço.` });
-        }
-        if (margemReal < 10) {
-            avisos.push({ tipo: 'aviso', mensagem: '⚠️ Margem de lucro muito baixa. Considere aumentar o preço para maior sustentabilidade.' });
-        }
+        if (preco < custoReal) avisos.push({ tipo: 'erro', mensagem: '⚠️ Preço abaixo do custo real!' });
+        if (margemReal < (margemDesejada * 0.5)) avisos.push({ tipo: 'aviso', mensagem: '⚠️ Margem real muito abaixo da desejada.' });
         this.mostrarAvisos(avisos);
     }
 
     mostrarAvisos(avisos) {
-        if (avisos.length === 0) {
-            this.avisos.classList.remove('ativo');
-            this.avisos.innerHTML = '';
-            return;
-        }
-        let html = '';
-        avisos.forEach(aviso => {
-            html += `<div class="aviso ${aviso.tipo}">${aviso.mensagem}</div>`;
-        });
-        this.avisos.innerHTML = html;
-        this.avisos.classList.add('ativo');
+        this.avisos.innerHTML = avisos.map(a => `<div class="aviso ${a.tipo}">${a.mensagem}</div>`).join('');
+        this.avisos.classList.toggle('ativo', avisos.length > 0);
     }
 
     mostrarErro(erros) {
-        alert('Erro na validação:\n\n' + erros.join('\n'));
+        alert('Por favor, preencha os campos obrigatórios:\n\n' + erros.join('\n'));
     }
 
     arredondarComercial(valor) {
@@ -317,93 +270,65 @@ class CalculadoraOvos {
     }
 
     gerarPDF() {
-        const nomeProduto = this.nomeProduto.value || 'Ovo de Páscoa';
+        const nome = this.nomeProduto.value || 'Ovo de Páscoa';
+        const data = new Date().toLocaleDateString('pt-BR');
         
-        const pdfContent = `
-            <div style="background: white; padding: 30px; font-family: Arial, sans-serif; color: #333;">
-                <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #E8B4B8;">
-                    <h1 style="color: #6B3E26; font-size: 1.8rem; margin: 0 0 10px 0;">🍫 Relatório de Preço - Ovo de Páscoa</h1>
-                    <p style="color: #666; font-size: 0.95rem; margin: 5px 0;">Calculadora de Preços para Confeiteiras</p>
+        // Criar um container invisível para o PDF
+        const element = document.createElement('div');
+        element.style.padding = '40px';
+        element.style.fontFamily = 'Arial, sans-serif';
+        element.style.color = '#333';
+        element.style.backgroundColor = '#fff';
+        
+        element.innerHTML = `
+            <div style="text-align: center; border-bottom: 2px solid #6B3E26; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="color: #6B3E26; margin: 0;">🍫 Relatório de Precificação</h1>
+                <p style="color: #888; margin: 5px 0;">Gerado em ${data}</p>
+            </div>
+            
+            <div style="background: #FDF5F0; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                <h2 style="margin-top: 0; color: #6B3E26;">📦 ${nome}</h2>
+                <p><strong>Modo de Cálculo:</strong> ${this.modo.toUpperCase()}</p>
+            </div>
+
+            <h3 style="border-left: 4px solid #6B3E26; padding-left: 10px; color: #6B3E26;">📊 Resumo de Custos</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr style="background: #f9f9f9;"><td style="padding: 10px; border: 1px solid #eee;">Ingredientes</td><td style="padding: 10px; border: 1px solid #eee; text-align: right;">${this.custoIngredientes.textContent}</td></tr>
+                <tr><td style="padding: 10px; border: 1px solid #eee;">Embalagem</td><td style="padding: 10px; border: 1px solid #eee; text-align: right;">${this.custoEmbalagemTotal.textContent}</td></tr>
+                <tr style="background: #f9f9f9;"><td style="padding: 10px; border: 1px solid #eee;">Mão de Obra</td><td style="padding: 10px; border: 1px solid #eee; text-align: right;">${this.custoMaoObra.textContent}</td></tr>
+                ${this.modo === 'avancado' ? `<tr><td style="padding: 10px; border: 1px solid #eee;">Custos Fixos</td><td style="padding: 10px; border: 1px solid #eee; text-align: right;">${this.custoFixoRateado.textContent}</td></tr>` : ''}
+                <tr style="background: #6B3E26; color: white;"><td style="padding: 10px; border: 1px solid #6B3E26;"><strong>CUSTO REAL TOTAL</strong></td><td style="padding: 10px; border: 1px solid #6B3E26; text-align: right;"><strong>${this.custoRealTotal.textContent}</strong></td></tr>
+            </table>
+
+            <h3 style="border-left: 4px solid #28a745; padding-left: 10px; color: #28a745;">💰 Sugestão de Venda</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: #f0fff0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #28a745;">
+                    <span style="font-size: 0.9rem; color: #666;">PREÇO SUGERIDO</span><br>
+                    <strong style="font-size: 1.8rem; color: #28a745;">${this.precoSugerido.textContent}</strong>
                 </div>
-                
-                <div style="background: #F4E6D9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin: 8px 0;"><strong>Produto:</strong> ${nomeProduto}</p>
-                    <p style="margin: 8px 0;"><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
-                </div>
-                
-                <h3 style="color: #6B3E26; margin-top: 20px; margin-bottom: 10px;">📊 Dados do Cálculo</h3>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem;">
-                    <tr style="background: #F4E6D9;">
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Peso da Casca</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.pesoCasca.value}g</td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Custo/kg</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.custoCasca.value || 0).toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Peso do Recheio</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.pesoRecheio.value}g</td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Custo/kg</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.custoRecheio.value || 0).toFixed(2)}</td>
-                    </tr>
-                    <tr style="background: #F4E6D9;">
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Tempo de Produção</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.tempoProducao.value} min</td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Valor/hora</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.valorHora.value || 0).toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Custo Embalagem</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">R$ ${parseFloat(this.custoEmbalagem.value || 0).toFixed(2)}</td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;"><strong>Margem Desejada</strong></td>
-                        <td style="padding: 8px; border: 1px solid #E5D5C8;">${this.margemLucro.value}%</td>
-                    </tr>
-                </table>
-                
-                <h3 style="color: #6B3E26; margin-top: 20px; margin-bottom: 10px;">✨ Resultados Finais</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
-                    <tr style="background: #FFF8F2; border-bottom: 2px solid #E8B4B8;">
-                        <td style="padding: 12px; border: 1px solid #E5D5C8;"><strong>Custo Real Total</strong></td>
-                        <td style="padding: 12px; border: 1px solid #E5D5C8; text-align: right; color: #C97B63; font-weight: bold;">${this.custoRealTotal.textContent}</td>
-                    </tr>
-                    <tr style="background: #FFF8F2;">
-                        <td style="padding: 12px; border: 1px solid #E5D5C8;"><strong>Preço Mínimo</strong></td>
-                        <td style="padding: 12px; border: 1px solid #E5D5C8; text-align: right;">${this.precoMinimo.textContent}</td>
-                    </tr>
-                    <tr style="background: #FFF8F2;">
-                        <td style="padding: 12px; border: 1px solid #E5D5C8;"><strong>Preço Sugerido</strong></td>
-                        <td style="padding: 12px; border: 1px solid #E5D5C8; text-align: right; color: #6AA84F; font-weight: bold; font-size: 1.1rem;">${this.precoSugerido.textContent}</td>
-                    </tr>
-                    <tr style="background: #FFF8F2;">
-                        <td style="padding: 12px; border: 1px solid #E5D5C8;"><strong>Lucro por Unidade</strong></td>
-                        <td style="padding: 12px; border: 1px solid #E5D5C8; text-align: right; color: #6AA84F;">${this.lucroUnidade.textContent}</td>
-                    </tr>
-                    <tr style="background: #FFF8F2;">
-                        <td style="padding: 12px; border: 1px solid #E5D5C8;"><strong>Margem Final</strong></td>
-                        <td style="padding: 12px; border: 1px solid #E5D5C8; text-align: right; color: #6AA84F;">${this.margemFinal.textContent}</td>
-                    </tr>
-                </table>
-                
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #E5D5C8; text-align: center; font-size: 0.85rem; color: #666;">
-                    <p style="margin: 5px 0;">Relatório gerado pela Calculadora de Preços de Ovos de Páscoa</p>
+                <div style="background: #fff; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #eee;">
+                    <span style="font-size: 0.9rem; color: #666;">LUCRO LÍQUIDO</span><br>
+                    <strong style="font-size: 1.8rem; color: #333;">${this.lucroUnidade.textContent}</strong>
                 </div>
             </div>
+            
+            <div style="margin-top: 40px; text-align: center; font-size: 0.8rem; color: #aaa; border-top: 1px solid #eee; padding-top: 20px;">
+                Calculadora de Ovos de Páscoa - Organização e Lucro
+            </div>
         `;
-        
-        const element = document.createElement('div');
-        element.innerHTML = pdfContent;
-        
+
         const opt = {
             margin: 10,
-            filename: `Relatorio-${nomeProduto.replace(/\s+/g, '-')}.pdf`,
+            filename: `Relatorio-${nome.replace(/\s+/g, '_')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
-        
+
         if (typeof html2pdf !== 'undefined') {
             html2pdf().set(opt).from(element).save();
         } else {
-            alert('Erro: Biblioteca de PDF não carregada.');
+            alert('Erro: Biblioteca PDF não encontrada.');
         }
     }
 }
